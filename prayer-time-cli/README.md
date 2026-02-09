@@ -18,7 +18,7 @@
     نسخ المستودع (Clone):
     Bash
 
-git clone https://github.com/YOUR_USERNAME/prayer-time-cli.git
+git clone https://github.com/MH7Q/prayer-time-cli/edit/main/prayer-time-cli/README.md
 cd mh7q-prayer-cli
 
 تثبيت المتطلبات:
