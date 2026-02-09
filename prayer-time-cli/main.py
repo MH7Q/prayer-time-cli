@@ -19,7 +19,7 @@ import utils
 import languages
 import startup
 
-APP_VERSION = "0.3"
+APP_VERSION = "0.4"
 BG_COLOR = "#0f0f0f"
 CARD_COLOR = "#1a1a1a"
 TEXT_MAIN = "#ffffff"
@@ -141,6 +141,12 @@ class PrayerApp:
         self.settings_win.configure(bg=CARD_COLOR)
         
         d = languages.LANG_DATA[self.cfg['lang']]
+
+        # --- DONATION BUTTON ---
+        def open_dono():
+            webbrowser.open("https://www.buymeacoffee.com/MH7Q")
+            
+        tk.Button(self.settings_win, text="☕ Support Developer", bg="#FFDD00", fg="black", font=("Arial", 10, "bold"), bd=0, cursor="hand2", command=open_dono).pack(pady=(20, 10))
 
         # 1. CITY
         tk.Label(self.settings_win, text=utils.fix_text(d['city'], self.cfg['lang']), bg=CARD_COLOR, fg="white", font=("Arial", 10, "bold")).pack(pady=(15,5))
