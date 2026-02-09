@@ -31,24 +31,24 @@ Bash
 التشغيل الأساسي (الوضع التفاعلي):
 Bash
 
-python3 mh7q_prayer.py
+python3 prayer_times.py
 
 سيطلب منك البرنامج تحديد اللغة والموقع في أول مرة فقط.
 
 تغيير اللغة يدوياً:
 Bash
 
-python3 mh7q_prayer.py --lang ar
+python3 prayer_times.py --lang ar
 
 استخراج جدول للشهر الحالي:
 Bash
 
-python3 mh7q_prayer.py --month
+python3 prayer_times.py --month
 
 إعادة ضبط الإعدادات (حذف الموقع المحفوظ):
 Bash
 
-python3 mh7q_prayer.py --reset
+python3 prayer_times.py --reset
 
 🛠️ الإعدادات
 
