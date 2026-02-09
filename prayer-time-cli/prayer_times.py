@@ -24,47 +24,6 @@ RED = "\033[91m"
 RESET = "\033[0m"
 BOLD = "\033[1m"
 
-You are very close, but the code you pasted has a small mistake in the middle!
-
-You accidentally included my "thinking text" (# ... Wait, that logic was too simple...) inside the code, and the p_row function is incomplete. It won't actually highlight the active prayer yet.
-
-Here is the Fixed & Final Version.
-What I added/fixed:
-
-    Active Highlight: The next prayer will now have a Cyan Arrow (➜) pointing to it, so you can see it instantly.
-
-    Qibla Direction: Added a line to show the Qibla direction (e.g., Makkah is at ...).
-
-    Fixed get_next_prayer: It now tells the display loop which prayer to highlight.
-
-Replace your entire file with this. It is ready for GitHub.
-Python
-
-import requests
-import json
-import argparse
-import os
-import sys
-from datetime import datetime, date, timedelta
-
-# --- Configuration ---
-CONFIG_FILE = "mh7q_config.json"
-
-# --- Visuals ---
-BANNER = r"""
-    __  __ __  __   _____  ____ 
-   /  |/  / / / /  /__  / / __ \
-  / /|_/ / /_/ /     / / / / / /
- / /  / / __  /     / / / /_/ / 
-/_/  /_/_/ /_/     /_/  \___\_\ 
-"""
-GREEN = "\033[92m"
-YELLOW = "\033[93m"
-CYAN = "\033[96m"
-RED = "\033[91m"
-RESET = "\033[0m"
-BOLD = "\033[1m"
-
 TEXTS = {
     "en": {
         "app_name": "PRAYER TIME CLI",
@@ -79,7 +38,16 @@ TEXTS = {
         "tomorrow": "Tomorrow",
         "month_gen": "📅 Generating Monthly Schedule...",
         "month_done": "✅ Saved schedule to:",
-        "qibla": "Qibla Direction"
+        "qibla": "Qibla Direction",
+        "gregorian": "Gregorian",
+        "hijri": "Hijri",
+        "timezone": "Timezone",
+        "fajr": "Fajr",
+        "sunrise": "Sunrise",
+        "dhuhr": "Dhuhr",
+        "asr": "Asr",
+        "maghrib": "Maghrib",
+        "isha": "Isha"
     },
     "ar": {
         "app_name": "أداة أوقات الصلاة",
@@ -94,7 +62,16 @@ TEXTS = {
         "tomorrow": "غداً",
         "month_gen": "📅 جاري إنشاء جدول الشهر...",
         "month_done": "✅ تم حفظ الجدول في:",
-        "qibla": "اتجاه القبلة"
+        "qibla": "اتجاه القبلة",
+        "gregorian": "ميلادي",
+        "hijri": "هجري",
+        "timezone": "المنطقة الزمنية",
+        "fajr": "الفجر",
+        "sunrise": "الشروق",
+        "dhuhr": "الظهر",
+        "asr": "العصر",
+        "maghrib": "المغرب",
+        "isha": "العشاء"
     }
 }
 
@@ -129,13 +106,12 @@ def generate_monthly_schedule(address, lang_code):
 
 def get_next_prayer(timings, lang_code):
     now = datetime.now()
-    # Returns: (Prayer Name, Time Left String, Next Prayer English Key)
     prayer_map_display = {
-        'Fajr': TEXTS[lang_code].get('fajr', 'Fajr'),
-        'Dhuhr': TEXTS[lang_code].get('dhuhr', 'Dhuhr'),
-        'Asr': TEXTS[lang_code].get('asr', 'Asr'),
-        'Maghrib': TEXTS[lang_code].get('maghrib', 'Maghrib'),
-        'Isha': TEXTS[lang_code].get('isha', 'Isha')
+        'Fajr': TEXTS[lang_code]['fajr'],
+        'Dhuhr': TEXTS[lang_code]['dhuhr'],
+        'Asr': TEXTS[lang_code]['asr'],
+        'Maghrib': TEXTS[lang_code]['maghrib'],
+        'Isha': TEXTS[lang_code]['isha']
     }
     
     for p_eng in ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha']:
@@ -151,7 +127,7 @@ def get_next_prayer(timings, lang_code):
     tomorrow = datetime.now() + timedelta(days=1)
     fajr_tomorrow = tomorrow.replace(hour=fajr_time.hour, minute=fajr_time.minute, second=0)
     delta = fajr_tomorrow - now
-    tomorrow_txt = TEXTS[lang_code].get('tomorrow', 'Tomorrow')
+    tomorrow_txt = TEXTS[lang_code]['tomorrow']
     return f"{prayer_map_display['Fajr']} ({tomorrow_txt})", str(delta).split('.')[0], 'Fajr'
 
 def load_config():
@@ -224,25 +200,20 @@ def get_prayer_times():
             timings = data['data']['timings']
             meta = data['data']['meta']
             date_hijri = data['data']['date']['hijri']
-
-            # Get Next Prayer Key (e.g., 'Asr')
             next_p_display, time_left, next_p_key = get_next_prayer(timings, lang)
 
             print("\n" + "="*45)
             print(f"📅 {T['gregorian']}: {today}")
             print(f"🌙 {T['hijri']}:     {date_hijri['day']} {date_hijri['month']['en']} {date_hijri['year']}")
-            
-            # --- Qibla Direction Added Here ---
             qibla_dir = data['data']['meta'].get('qibla_direction', 'N/A')
-            print(f"🧭 {T['qibla']}:     {qibla_dir}°") 
-            
+            print(f"🧭 {T['qibla']}:     {qibla_dir}°")
             print(f"📍 {T['timezone']}:  {meta['timezone']}")
             print("="*45)
             
             def p_row(key, val):
+                # Lookup translations using lower case key, e.g., 'fajr'
                 lbl = T.get(key.lower(), key)
                 time_str = convert_to_12h(val)
-                # Highlight the NEXT prayer in Cyan with Arrow
                 if key == next_p_key:
                     print(f"{CYAN}{BOLD}➜ {lbl:<10} \t{time_str}  <--{RESET}")
                 else:
@@ -265,6 +236,7 @@ def get_prayer_times():
             if os.path.exists(CONFIG_FILE): os.remove(CONFIG_FILE)
 
     except Exception as e:
+        # Print the actual error for debugging
         print(f"\n{T['error_conn']} {e}")
 
 if __name__ == "__main__":
