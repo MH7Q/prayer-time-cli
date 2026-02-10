@@ -1,4 +1,4 @@
-name: Build Windows EXE
+name: Build and Auto-Release
 
 on:
   push:
@@ -8,29 +8,44 @@ on:
 jobs:
   build:
     runs-on: windows-latest
+    permissions:
+      contents: write
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: '3.11'
 
     - name: Install Dependencies
       run: |
-        pip install pyinstaller pillow pystray requests arabic-reshaper python-bidi pygame
+        pip install pyinstaller pillow pystray requests arabic-reshaper python-bidi pygame geocoder
 
     - name: Build EXE
       run: |
         pyinstaller --noconsole --onefile --name "Prayer_Station" main.py
 
-    - name: Copy Audio
+    - name: Create Zip Package
       run: |
-        copy adhan.mp3 dist\adhan.mp3
+        mkdir release_folder
+        copy dist\Prayer_Station.exe release_folder\
+        copy adhan.mp3 release_folder\
+        powershell Compress-Archive -Path release_folder\* -DestinationPath Prayer_Station_v0.6.zip
 
-    - name: Upload EXE
-      uses: actions/upload-artifact@v4
+    - name: Auto-Create GitHub Release
+      uses: softprops/action-gh-release@v1
       with:
-        name: Prayer_Station_Windows
-        path: dist/
+        files: Prayer_Station_v0.6.zip
+        tag_name: v0.6
+        name: Prayer Station v0.6 🇸🇦
+        body: |
+          Automatic Build by GitHub Actions.
+          - Added Gaming HUD (Mini-Mode)
+          - Added Auto-Location detection
+          - Coded by MH7Q 🇸🇦
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
