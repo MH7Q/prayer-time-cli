@@ -19,7 +19,7 @@ import utils
 import languages
 import startup
 
-APP_VERSION = "0.4"
+APP_VERSION = "0.5"
 BG_COLOR = "#0f0f0f"
 CARD_COLOR = "#1a1a1a"
 TEXT_MAIN = "#ffffff"

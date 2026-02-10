@@ -16,7 +16,7 @@ def fetch_prayer_times(city):
 
 def check_version_mismatch(current_version):
     # Reads the raw version.txt from GitHub
-    url = "https://raw.githubusercontent.com/MH7Q/prayer-time-cli/refs/heads/main/prayer-time-cli/version.txt"
+    url = "https://raw.githubusercontent.com/MH7Q/prayer-time-cli/refs/heads/main/version.txt"
     try:
         res = requests.get(url, timeout=5)
         if res.status_code == 200:
